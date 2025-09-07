@@ -1,4 +1,5 @@
 import typing
+from lib2to3.pgen2.tokenize import group
 from urllib.parse import urlencode, urljoin
 
 from aiohttp.client import ClientSession
@@ -26,11 +27,12 @@ class VkApiAccessor(BaseAccessor):
         # TODO: добавить создание aiohttp ClientSession,
         #  получить данные о long poll сервере с помощью метода groups.getLongPollServer
         #  вызвать метод start у Poller
-        raise NotImplementedError
+        self.app = app
+        self.session = ClientSession()
 
     async def disconnect(self, app: "Application"):
         # TODO: закрыть сессию и завершить поллер
-        raise NotImplementedError
+        pass
 
     @staticmethod
     def _build_query(host: str, method: str, params: dict) -> str:
@@ -44,4 +46,4 @@ class VkApiAccessor(BaseAccessor):
         raise NotImplementedError
 
     async def send_message(self, message: Message) -> None:
-        raise NotImplementedError
+        pass

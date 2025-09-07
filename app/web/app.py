@@ -11,6 +11,7 @@ from app.web.config import Config, setup_config
 from app.web.logger import setup_logging
 from app.web.middlewares import setup_middlewares
 from app.web.routes import setup_routes
+from aiohttp_apispec import setup_aiohttp_apispec
 
 
 class Application(AiohttpApplication):
@@ -47,7 +48,14 @@ app = Application()
 def setup_app(config_path: str) -> Application:
     setup_logging(app)
     setup_config(app, config_path)
-    setup_routes(app)
-    setup_middlewares(app)
     setup_store(app)
+    setup_aiohttp_apispec(
+        app=app,
+        title="My API",
+        version="v1",
+        url="/api/docs/swagger.json",
+        swagger_path="/api/docs",
+    )
+    setup_middlewares(app)
+    setup_routes(app)
     return app
