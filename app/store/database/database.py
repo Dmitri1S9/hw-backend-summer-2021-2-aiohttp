@@ -18,3 +18,4 @@ class Database:
 
     def clear(self):
         self.themes.clear()
+        self.questions.clear()

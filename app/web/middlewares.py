@@ -5,7 +5,6 @@ from aiohttp.web_exceptions import (HTTPUnprocessableEntity, HTTPBadRequest, HTT
 HTTPForbidden, HTTPNotFound, HTTPNotImplemented, HTTPConflict, HTTPInternalServerError)
 from aiohttp.web_middlewares import middleware
 from aiohttp_apispec import validation_middleware
-from marshmallow import ValidationError
 
 from app.web.utils import error_json_response
 
@@ -21,6 +20,7 @@ HTTP_ERROR_CODES = {
     409: "conflict",
     500: "internal_server_error",
 }
+PATHS_WITHOUT_AUTH = ["/admin.login", "/admin.current"]
 
 
 @middleware
@@ -90,18 +90,28 @@ async def error_handling_middleware(request: "Request", handler):
             message=e.reason,
             data={"details": e.text} if e.text else {},
         )
-    # except Exception as e:
-    #     return error_json_response(
-    #         status=HTTP_ERROR_CODES[500],
-    #         message="Upps... Server error):",
-    #         data={},
-    #     )
+    except Exception as e:
+        return error_json_response(
+            status=HTTP_ERROR_CODES[500],
+            message="Upps... Server error):",
+            data={"exception": str(e)},
+        )
 
     return response
-    # TODO: обработать все исключения-наследники HTTPException и отдельно Exception, как server error
-    #  использовать текст из HTTP_ERROR_CODES
+
+@middleware
+async def auth_middleware(request: "Request", handler):
+    if request.path in PATHS_WITHOUT_AUTH:
+        return await handler(request)
+    admin_id = request.cookies.get("id")
+    admin_email = request.cookies.get("email")
+    if not admin_email or not admin_id:
+        raise HTTPUnauthorized
+
+    return await handler(request)
 
 
 def setup_middlewares(app: "Application"):
     app.middlewares.append(error_handling_middleware)
+    app.middlewares.append(auth_middleware)
     app.middlewares.append(validation_middleware)

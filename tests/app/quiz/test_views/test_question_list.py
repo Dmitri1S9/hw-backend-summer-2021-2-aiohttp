@@ -55,8 +55,8 @@ class TestQuestionListView:
         self, auth_cli: TestClient, question_1: Question
     ) -> None:
         response = await auth_cli.get("/quiz.list_questions")
+        print(await response.text())
         assert response.status == 200
-
         data = await response.json()
         assert data == {
             "status": "ok",
@@ -85,9 +85,11 @@ class TestQuestionListView:
         self, auth_cli: TestClient, question_1: Question, question_2: Question
     ) -> None:
         response = await auth_cli.get("/quiz.list_questions")
+        print(await response.text())
         assert response.status == 200
 
         data = await response.json()
+
         assert data == {
             "status": "ok",
             "data": {
